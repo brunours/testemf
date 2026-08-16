@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Source Articles — Daily News Collection Monitor</title>
+<style>
+:root{--bg:#f5f7fb;--p:#fff;--p2:#f8fafc;--t:#172033;--m:#667085;--l:#e4e7ec;--a:#3157d5;--g:#168052;--w:#a15c00;--b:#b42318;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#0d1117;--p:#151b23;--p2:#10161e;--t:#edf2f7;--m:#98a2b3;--l:#2b3440;--a:#8ba4ff;--g:#58d49b;--w:#ffb757;--b:#ff7b72}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.w{max-width:1180px;margin:auto;padding:24px 16px 50px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.ey{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:750;color:var(--m)}
+h1{margin:5px 0;font-size:29px}
+.mut,.small{color:var(--m)}
+.back{display:inline-block;color:var(--a);text-decoration:none;font-weight:700;margin-bottom:8px}
+.back:hover{text-decoration:underline}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+button,.btn{border:0;border-radius:9px;background:var(--a);color:#fff;font-weight:750;padding:10px 15px;cursor:pointer;text-decoration:none;font:inherit}
+button:disabled,.btn.disabled{opacity:.45;cursor:default;pointer-events:none}
+.stamp{font-size:11px;color:var(--m);text-align:right}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.card,.article{background:var(--p);border:1px solid var(--l);border-radius:13px}
+.card{padding:15px}
+.lab{font-size:11px;color:var(--m);font-weight:700}
+.val{font-size:22px;font-weight:780;margin-top:4px}
+.small{font-size:11px;margin-top:3px}
+.error{display:none;border:1px solid var(--b);color:var(--b);background:var(--p);padding:10px 12px;border-radius:9px;margin-top:12px}
+.list{display:grid;gap:12px;margin-top:14px}
+.article{padding:16px}
+.article h2{font-size:17px;line-height:1.35;margin:0 0 7px}
+.article h2 a{color:var(--t);text-decoration:none}
+.article h2 a:hover{color:var(--a);text-decoration:underline}
+.desc{line-height:1.5;color:var(--t);margin:9px 0 12px}
+.meta{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--m);font-size:11px}
+.meta b{color:var(--t);font-weight:700}
+.badge{border:1px solid var(--l);background:var(--p2);border-radius:999px;padding:3px 7px;font-size:10px}
+.article-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--l)}
+.original{color:var(--a);font-weight:700;text-decoration:none;font-size:12px}
+.original:hover{text-decoration:underline}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
+.empty{padding:30px 16px;text-align:center;color:var(--m);background:var(--p);border:1px solid var(--l);border-radius:13px;margin-top:14px}
+@media(max-width:650px){.w{padding:18px 10px 40px}.top{display:block}.actions{margin-top:12px;justify-content:space-between}.stamp{text-align:left}.summary{grid-template-columns:1fr}.article{padding:14px}.article-footer{align-items:flex-start;flex-direction:column}.pager{align-items:stretch}.pager .btn{flex:1;text-align:center}}
+</style>
+</head>
+<body>
+<div class="w">
+  <a class="back" href="index.html">← Collection Monitor</a>
+  <div class="top">
+    <div>
+      <div class="ey">Daily News Briefing v2 · Source articles</div>
+      <h1 id="title">Loading source…</h1>
+      <div class="mut">Articles are sorted by database creation/first collection time, newest first.</div>
+    </div>
+    <div class="actions">
+      <div class="stamp"><div id="rt">Last refreshed: —</div><div id="dt">Data generated: —</div></div>
+      <button id="rb">Refresh</button>
+    </div>
+  </div>
+
+  <div id="err" class="error"></div>
+
+  <div class="summary">
+    <div class="card"><div class="lab">Articles stored</div><div id="total" class="val">—</div><div class="small">For this source</div></div>
+    <div class="card"><div class="lab">Showing</div><div id="showing" class="val">—</div><div id="range" class="small">—</div></div>
+    <div class="card"><div class="lab">Page</div><div id="page" class="val">—</div><div id="pages" class="small">—</div></div>
+  </div>
+
+  <div id="list" class="list"></div>
+  <div id="empty" class="empty" style="display:none">No stored articles were found for this source.</div>
+
+  <div class="pager">
+    <a id="prev" class="btn disabled" href="#">← Newer page</a>
+    <div id="pagerText" class="small">—</div>
+    <a id="next" class="btn disabled" href="#">Older page →</a>
+  </div>
+</div>
+
+<script>
+var API='https://rbwcmjtcmhnivkmoxpsj.supabase.co/functions/v1/news-stats-api',
+    $=function(x){return document.getElementById(x)},
+    nf=new Intl.NumberFormat('en-GB'),
+    df=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZoneName:'short'}),
+    sf=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}),
+    params=new URLSearchParams(location.search),
+    source=(params.get('source')||'').trim(),
+    currentPage=Math.max(1,parseInt(params.get('page')||'1',10)||1),
+    pageSize=100;
+
+function fmt(v){return v?df.format(new Date(v)):'—'}
+function sh(v){return v?sf.format(new Date(v)):'—'}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function safeUrl(v){try{var u=new URL(v);return(u.protocol==='http:'||u.protocol==='https:')?u.href:''}catch(e){return''}}
+function pageHref(p){return'source.html?source='+encodeURIComponent(source)+'&page='+p}
+
+function articleHtml(a){
+  var url=safeUrl(a.canonical_url),
+      feeds=(a.feed_names&&a.feed_names.length?a.feed_names.join(', '):a.feed_name)||'—',
+      title=esc(a.title||'(Untitled article)'),
+      titleHtml=url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+title+'</a>':title,
+      group=a.source_group?'<span class="badge">'+esc(a.source_group)+'</span>':'',
+      category=a.category?'<span class="badge">'+esc(a.category)+'</span>':'',
+      score=a.agenda_score!=null?'<span class="badge">Agenda score '+esc(a.agenda_score)+'</span>':'',
+      desc=a.description?'<div class="desc">'+esc(a.description)+'</div>':'',
+      original=url?'<a class="original" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open original article ↗</a>':'<span class="small">No original URL stored</span>';
+
+  return '<article class="article">'+
+    '<h2>'+titleHtml+'</h2>'+
+    '<div class="meta"><span><b>Collected/created:</b> '+sh(a.first_seen_at)+'</span><span><b>Published:</b> '+sh(a.published_at)+'</span><span><b>Last seen:</b> '+sh(a.last_seen_at)+'</span><span><b>Fetched:</b> '+sh(a.fetched_at)+'</span></div>'+
+    desc+
+    '<div class="meta">'+group+category+score+'<span><b>Feed:</b> '+esc(feeds)+'</span><span><b>Article ID:</b> '+esc(a.id)+'</span></div>'+
+    '<div class="article-footer">'+original+'<span class="small">'+esc(a.source_family||'')+'</span></div>'+
+  '</article>'
+}
+
+function render(d){
+  document.title=(d.source||source)+' Articles — Daily News Collection Monitor';
+  $('title').textContent=d.source||source||'Source articles';
+  $('total').textContent=nf.format(d.total||0);
+  $('showing').textContent=nf.format((d.articles||[]).length);
+  var first=d.total?((d.page-1)*d.limit+1):0,
+      last=d.total?Math.min(d.page*d.limit,d.total):0;
+  $('range').textContent=d.total?nf.format(first)+'–'+nf.format(last)+' of '+nf.format(d.total):'No articles';
+  $('page').textContent=nf.format(d.page||1);
+  $('pages').textContent=(d.total_pages||0)?'of '+nf.format(d.total_pages):'of 0';
+  $('list').innerHTML=(d.articles||[]).map(articleHtml).join('');
+  $('empty').style.display=(d.articles||[]).length?'none':'block';
+  $('dt').textContent='Data generated: '+fmt(d.generated_at);
+
+  var prev=$('prev'),next=$('next'),pages=d.total_pages||0;
+  if(d.page>1){prev.className='btn';prev.href=pageHref(d.page-1)}else{prev.className='btn disabled';prev.href='#'}
+  if(pages&&d.page<pages){next.className='btn';next.href=pageHref(d.page+1)}else{next.className='btn disabled';next.href='#'}
+  $('pagerText').textContent=pages?'Page '+nf.format(d.page)+' of '+nf.format(pages):'No pages'
+}
+
+async function refresh(){
+  var b=$('rb');
+  b.disabled=true;
+  b.textContent='Refreshing…';
+  $('err').style.display='none';
+  if(!source){
+    $('err').textContent='No source was specified. Return to the Collection Monitor and select a source.';
+    $('err').style.display='block';
+    b.disabled=false;b.textContent='Refresh';return
+  }
+  try{
+    var u=API+'?source='+encodeURIComponent(source)+'&page='+currentPage+'&limit='+pageSize+'&t='+Date.now(),
+        r=await fetch(u,{cache:'no-store'});
+    if(!r.ok)throw new Error('API returned '+r.status);
+    render(await r.json());
+    $('rt').textContent='Last refreshed: '+df.format(new Date())
+  }catch(e){
+    $('err').textContent='Could not load articles: '+e.message;
+    $('err').style.display='block'
+  }finally{
+    b.disabled=false;
+    b.textContent='Refresh'
+  }
+}
+
+$('rb').onclick=refresh;
+refresh();
+</script>
+</body>
+</html>
