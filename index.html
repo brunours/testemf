@@ -21,7 +21,7 @@ h1{margin:5px 0;font-size:29px}
 .good{color:var(--g)}.warn{color:var(--w)}.bad{color:var(--b)}
 .dot.good{background:var(--g)}.dot.warn{background:var(--w)}.dot.bad{background:var(--b)}
 button{border:0;border-radius:9px;background:var(--a);color:#fff;font-weight:750;padding:10px 15px;cursor:pointer}
-button:disabled{opacity:.65;cursor:default}
+button:disabled{opacity:.65;cursor:default}.secondary{background:var(--p2);color:var(--t);border:1px solid var(--l)}
 .stamp{font-size:11px;color:var(--m);text-align:right}
 .cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:18px}
 .card,.sec{background:var(--p);border:1px solid var(--l);border-radius:13px}
@@ -36,7 +36,7 @@ button:disabled{opacity:.65;cursor:default}
 .cell{padding:14px 16px;border-right:1px solid var(--l)}
 .cell:last-child{border-right:0}
 .rv{font-size:18px;font-weight:760;margin-top:3px}
-.tools{display:flex;gap:8px}
+.tools{display:flex;gap:8px}.article-search-tools{min-width:min(620px,55vw)}.article-search-tools .input{flex:1;min-width:180px}.search-info{padding:12px 16px;color:var(--m);font-size:12px}.search-pager{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--l)}.article-title{font-weight:700;color:var(--t);text-decoration:none}.article-title:hover{color:var(--a);text-decoration:underline}.snippet{color:var(--m);font-size:11px;line-height:1.35;margin-top:3px;max-width:620px}
 .input,.select{border:1px solid var(--l);background:var(--p2);color:var(--t);border-radius:8px;padding:8px 9px;font:inherit;font-size:12px}
 .scroll{overflow:auto}
 table{width:100%;border-collapse:collapse;min-width:1000px}
@@ -47,7 +47,7 @@ th{font-size:10px;text-transform:uppercase;color:var(--m);background:var(--p2)}
 .badge{border:1px solid var(--l);border-radius:999px;padding:3px 6px;font-size:10px}
 .error{display:none;border:1px solid var(--b);color:var(--b);background:var(--p);padding:10px 12px;border-radius:9px;margin-top:12px}
 @media(max-width:1000px){.cards{grid-template-columns:repeat(3,1fr)}.run{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:650px){.w{padding:18px 10px 40px}.top{display:block}.actions{margin-top:12px;justify-content:space-between}.stamp{text-align:left}.cards{grid-template-columns:repeat(2,1fr)}.run{grid-template-columns:repeat(2,1fr)}.head{align-items:flex-start;flex-direction:column}.tools{width:100%}.input{flex:1;min-width:0}}
+@media(max-width:650px){.w{padding:18px 10px 40px}.top{display:block}.actions{margin-top:12px;justify-content:space-between}.stamp{text-align:left}.cards{grid-template-columns:repeat(2,1fr)}.run{grid-template-columns:repeat(2,1fr)}.head{align-items:flex-start;flex-direction:column}.tools{width:100%}.article-search-tools{min-width:0;flex-wrap:wrap}.article-search-tools .input{flex-basis:100%}.article-search-tools button{flex:1}.input{flex:1;min-width:0}.search-pager{align-items:stretch}.search-pager button{flex:1}}
 </style>
 </head>
 <body>
@@ -94,6 +94,32 @@ th{font-size:10px;text-transform:uppercase;color:var(--m);background:var(--p2)}
   <div class="sec">
     <div class="head">
       <div>
+        <div class="ttl">Search articles</div>
+        <div class="small">Search the full retained article database across titles, descriptions, sources, feeds and stored category text.</div>
+      </div>
+      <form id="asf" class="tools article-search-tools">
+        <input id="asq" class="input" type="search" placeholder="Search all articles…" autocomplete="off">
+        <button id="asb" type="submit">Search</button>
+        <button id="asc" type="button" class="secondary">Clear</button>
+      </form>
+    </div>
+    <div id="asinfo" class="search-info">Enter a search term to find articles across all sources.</div>
+    <div id="aswrap" class="scroll" style="display:none">
+      <table>
+        <thead><tr><th>Source</th><th>Article</th><th>Collected</th><th>Published</th><th>Feed</th></tr></thead>
+        <tbody id="asr"></tbody>
+      </table>
+    </div>
+    <div id="aspager" class="search-pager" style="display:none">
+      <button id="asprev" class="secondary" type="button">← Newer results</button>
+      <span id="asptext" class="small">—</span>
+      <button id="asnext" class="secondary" type="button">Older results →</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="head">
+      <div>
         <div class="ttl">Articles by source</div>
         <div class="small">Select a source name to view its articles. Latest new article is the first collection time; last seen confirms ongoing feed observation.</div>
       </div>
@@ -127,7 +153,8 @@ var API='https://rbwcmjtcmhnivkmoxpsj.supabase.co/functions/v1/news-stats-api',
     $=function(x){return document.getElementById(x)},
     nf=new Intl.NumberFormat('en-GB'),
     df=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZoneName:'short'}),
-    sf=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false});
+    sf=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}),
+    articleSearchPage=1,articleSearchTerm='',articleSearchLimit=50;
 
 function fmt(v){return v?df.format(new Date(v)):'—'}
 function sh(v){return v?sf.format(new Date(v)):'—'}
@@ -135,6 +162,41 @@ function ago(v){if(!v)return'—';var s=Math.max(0,(Date.now()-new Date(v))/1000
 function dur(a,b){return a&&b?((new Date(b)-new Date(a))/1000).toFixed(1)+' sec':'—'}
 function fresh(v){if(!v)return['bad','No data'];var m=(Date.now()-new Date(v))/60000;return m<=75?['good',ago(v)]:m<=150?['warn',ago(v)]:['bad',ago(v)]}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function safeUrl(v){try{var u=new URL(v);return(u.protocol==='http:'||u.protocol==='https:')?u.href:''}catch(e){return''}}
+
+function articleSearchRow(a){
+  var url=safeUrl(a.canonical_url),srcHref='source.html?source='+encodeURIComponent(a.source_name||''),title=esc(a.title||'(Untitled article)'),titleHtml=url?'<a class="article-title" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+title+'</a>':'<span class="article-title">'+title+'</span>',desc=a.description?'<div class="snippet">'+esc(a.description.length>180?a.description.slice(0,180)+'…':a.description)+'</div>':'';
+  return '<tr><td><a class="src" href="'+srcHref+'">'+esc(a.source_name||'—')+'</a><div class="small">'+esc(a.source_group||'')+'</div></td><td>'+titleHtml+desc+'</td><td>'+sh(a.first_seen_at)+'</td><td>'+sh(a.published_at)+'</td><td>'+esc((a.feed_names&&a.feed_names.length?a.feed_names.join(', '):a.feed_name)||'—')+'</td></tr>'
+}
+
+function renderArticleSearch(d){
+  var articles=d.articles||[],pages=d.total_pages||0;
+  $('aswrap').style.display='block';
+  $('aspager').style.display='flex';
+  $('asr').innerHTML=articles.map(articleSearchRow).join('');
+  $('asinfo').textContent=nf.format(d.total||0)+' result'+(d.total===1?'':'s')+' for “'+articleSearchTerm+'” · newest first';
+  $('asptext').textContent=pages?'Page '+nf.format(d.page)+' of '+nf.format(pages):'No results';
+  $('asprev').disabled=d.page<=1;
+  $('asnext').disabled=!pages||d.page>=pages
+}
+
+function clearArticleSearch(){
+  articleSearchTerm='';articleSearchPage=1;$('asq').value='';$('asr').innerHTML='';$('aswrap').style.display='none';$('aspager').style.display='none';$('asinfo').textContent='Enter a search term to find articles across all sources.'
+}
+
+async function runArticleSearch(page){
+  var term=$('asq').value.trim();
+  if(!term){clearArticleSearch();return}
+  articleSearchTerm=term;articleSearchPage=Math.max(1,page||1);
+  var b=$('asb');b.disabled=true;b.textContent='Searching…';
+  try{
+    var u=API+'?search='+encodeURIComponent(articleSearchTerm)+'&page='+articleSearchPage+'&limit='+articleSearchLimit+'&t='+Date.now(),r=await fetch(u,{cache:'no-store'});
+    if(!r.ok)throw new Error('API returned '+r.status);
+    renderArticleSearch(await r.json())
+  }catch(e){
+    $('asinfo').textContent='Search failed: '+e.message;$('aswrap').style.display='none';$('aspager').style.display='none'
+  }finally{b.disabled=false;b.textContent='Search'}
+}
 
 function rows(){
   var q=$('q').value.toLowerCase(),g=$('grp').value,out=[];
@@ -207,6 +269,10 @@ async function refresh(){
   }
 }
 $('rb').onclick=refresh;
+$('asf').onsubmit=function(e){e.preventDefault();runArticleSearch(1)};
+$('asc').onclick=clearArticleSearch;
+$('asprev').onclick=function(){if(articleSearchPage>1)runArticleSearch(articleSearchPage-1)};
+$('asnext').onclick=function(){runArticleSearch(articleSearchPage+1)};
 $('q').oninput=rows;
 $('grp').onchange=rows;
 refresh();
