@@ -22,12 +22,12 @@ button,.btn{border:0;border-radius:9px;background:var(--a);color:#fff;font-weigh
 button:disabled,.btn.disabled{opacity:.45;cursor:default;pointer-events:none}
 .stamp{font-size:11px;color:var(--m);text-align:right}
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-.card,.article,.categories{background:var(--p);border:1px solid var(--l);border-radius:13px}
+.card,.article,.categories,.search-panel{background:var(--p);border:1px solid var(--l);border-radius:13px}
 .card{padding:15px}
 .lab{font-size:11px;color:var(--m);font-weight:700}
 .val{font-size:22px;font-weight:780;margin-top:4px}
 .small{font-size:11px;margin-top:3px}
-.categories{display:none;margin-top:14px;padding:14px 15px}.cat-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}.cat-title{font-weight:780}.cat-grid{display:flex;flex-wrap:wrap;gap:8px}.cat-btn{border:1px solid var(--l);background:var(--p2);color:var(--t);border-radius:10px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:12px;font-weight:650}.cat-btn:hover{border-color:var(--a)}.cat-btn.active{background:var(--a);border-color:var(--a);color:#fff}.cat-count{font-size:13px;font-weight:800;min-width:22px;text-align:right}
+.categories{display:none;margin-top:14px;padding:14px 15px}.search-panel{margin-top:14px;padding:14px 15px}.search-form{display:flex;gap:8px;align-items:center}.search-input{flex:1;min-width:0;border:1px solid var(--l);background:var(--p2);color:var(--t);border-radius:9px;padding:10px 11px;font:inherit}.secondary{background:var(--p2);color:var(--t);border:1px solid var(--l)}.search-status{margin-top:7px;color:var(--m);font-size:11px}.cat-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}.cat-title{font-weight:780}.cat-grid{display:flex;flex-wrap:wrap;gap:8px}.cat-btn{border:1px solid var(--l);background:var(--p2);color:var(--t);border-radius:10px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:12px;font-weight:650}.cat-btn:hover{border-color:var(--a)}.cat-btn.active{background:var(--a);border-color:var(--a);color:#fff}.cat-count{font-size:13px;font-weight:800;min-width:22px;text-align:right}
 .error{display:none;border:1px solid var(--b);color:var(--b);background:var(--p);padding:10px 12px;border-radius:9px;margin-top:12px}
 .list{display:grid;gap:12px;margin-top:14px}
 .article{padding:16px}
@@ -43,7 +43,7 @@ button:disabled,.btn.disabled{opacity:.45;cursor:default;pointer-events:none}
 .original:hover{text-decoration:underline}
 .pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
 .empty{padding:30px 16px;text-align:center;color:var(--m);background:var(--p);border:1px solid var(--l);border-radius:13px;margin-top:14px}
-@media(max-width:650px){.w{padding:18px 10px 40px}.top{display:block}.actions{margin-top:12px;justify-content:space-between}.stamp{text-align:left}.summary{grid-template-columns:1fr}.cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cat-btn{justify-content:space-between}.article{padding:14px}.article-footer{align-items:flex-start;flex-direction:column}.pager{align-items:stretch}.pager .btn{flex:1;text-align:center}}
+@media(max-width:650px){.w{padding:18px 10px 40px}.top{display:block}.actions{margin-top:12px;justify-content:space-between}.stamp{text-align:left}.summary{grid-template-columns:1fr}.cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cat-btn{justify-content:space-between}.search-form{flex-wrap:wrap}.search-input{flex-basis:100%}.search-form button{flex:1}.article{padding:14px}.article-footer{align-items:flex-start;flex-direction:column}.pager{align-items:stretch}.pager .btn{flex:1;text-align:center}}
 </style>
 </head>
 <body>
@@ -74,6 +74,15 @@ button:disabled,.btn.disabled{opacity:.45;cursor:default;pointer-events:none}
     <div id="catGrid" class="cat-grid"></div>
   </div>
 
+  <div class="search-panel">
+    <form id="searchForm" class="search-form">
+      <input id="searchInput" class="search-input" type="search" placeholder="Search articles in this source…" autocomplete="off">
+      <button type="submit">Search</button>
+      <button id="clearSearch" type="button" class="secondary">Clear</button>
+    </form>
+    <div id="searchStatus" class="search-status">Search title, description, feed and stored category text.</div>
+  </div>
+
   <div id="list" class="list"></div>
   <div id="empty" class="empty" style="display:none">No stored articles were found for this source.</div>
 
@@ -94,14 +103,16 @@ var API='https://rbwcmjtcmhnivkmoxpsj.supabase.co/functions/v1/news-stats-api',
     source=(params.get('source')||'').trim(),
     currentPage=Math.max(1,parseInt(params.get('page')||'1',10)||1),
     currentCategory=(params.get('category')||'').trim(),
+    currentSearch=(params.get('search')||'').trim(),
     pageSize=100;
 
 function fmt(v){return v?df.format(new Date(v)):'—'}
 function sh(v){return v?sf.format(new Date(v)):'—'}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function safeUrl(v){try{var u=new URL(v);return(u.protocol==='http:'||u.protocol==='https:')?u.href:''}catch(e){return''}}
-function pageHref(p){var u='source.html?source='+encodeURIComponent(source)+'&page='+p;if(currentCategory)u+='&category='+encodeURIComponent(currentCategory);return u}
+function pageHref(p){var u='source.html?source='+encodeURIComponent(source)+'&page='+p;if(currentCategory)u+='&category='+encodeURIComponent(currentCategory);if(currentSearch)u+='&search='+encodeURIComponent(currentSearch);return u}
 function setCategory(c){currentCategory=c||'';currentPage=1;var u=pageHref(1);history.replaceState(null,'',u);refresh()}
+function setSearch(v){currentSearch=(v||'').trim();currentPage=1;$('searchInput').value=currentSearch;history.replaceState(null,'',pageHref(1));refresh()}
 function renderCategories(d){var cats=d.category_counts||[],box=$('categories'),grid=$('catGrid');if(!cats.length){box.style.display='none';grid.innerHTML='';return}box.style.display='block';var out=['<button class="cat-btn '+(!currentCategory?'active':'')+'" data-category=""><span>All</span><span class="cat-count">'+nf.format(d.source_total||0)+'</span></button>'];cats.forEach(function(c){var name=String(c.category||''),active=name===currentCategory?'active':'';out.push('<button class="cat-btn '+active+'" data-category="'+esc(name)+'"><span>'+esc(name)+'</span><span class="cat-count">'+nf.format(c.article_count||0)+'</span></button>')});grid.innerHTML=out.join('');Array.prototype.forEach.call(grid.querySelectorAll('.cat-btn'),function(b){b.onclick=function(){setCategory(b.getAttribute('data-category')||'')}})}
 
 function articleHtml(a){
@@ -128,11 +139,14 @@ function render(d){
   document.title=(d.source||source)+' Articles — Daily News Collection Monitor';
   $('title').textContent=d.source||source||'Source articles';
   $('total').textContent=nf.format(d.source_total!=null?d.source_total:(d.total||0));
-  $('totalSub').textContent=currentCategory?'Source total · filtering '+currentCategory:'For this source';
+  $('totalSub').textContent=(currentCategory||currentSearch)?'Source total · filters active':'For this source';
   $('showing').textContent=nf.format((d.articles||[]).length);
   var first=d.total?((d.page-1)*d.limit+1):0,
       last=d.total?Math.min(d.page*d.limit,d.total):0;
-  $('range').textContent=d.total?nf.format(first)+'–'+nf.format(last)+' of '+nf.format(d.total)+(currentCategory?' in '+currentCategory:''):(currentCategory?'No articles in '+currentCategory:'No articles');
+  var filterLabel=(currentCategory?' · '+currentCategory:'')+(currentSearch?' · search: “'+currentSearch+'”':'');
+  $('range').textContent=d.total?nf.format(first)+'–'+nf.format(last)+' of '+nf.format(d.total)+filterLabel:'No matching articles'+filterLabel;
+  $('searchInput').value=currentSearch;
+  $('searchStatus').textContent=currentSearch?'Searching for “'+currentSearch+'”'+(currentCategory?' in '+currentCategory:'')+' · '+nf.format(d.total||0)+' matches':'Search title, description, feed and stored category text.';
   $('page').textContent=nf.format(d.page||1);
   $('pages').textContent=(d.total_pages||0)?'of '+nf.format(d.total_pages):'of 0';
   $('list').innerHTML=(d.articles||[]).map(articleHtml).join('');
@@ -157,7 +171,7 @@ async function refresh(){
     b.disabled=false;b.textContent='Refresh';return
   }
   try{
-    var u=API+'?source='+encodeURIComponent(source)+'&page='+currentPage+'&limit='+pageSize+(currentCategory?'&category='+encodeURIComponent(currentCategory):'')+'&t='+Date.now(),
+    var u=API+'?source='+encodeURIComponent(source)+'&page='+currentPage+'&limit='+pageSize+(currentCategory?'&category='+encodeURIComponent(currentCategory):'')+(currentSearch?'&search='+encodeURIComponent(currentSearch):'')+'&t='+Date.now(),
         r=await fetch(u,{cache:'no-store'});
     if(!r.ok)throw new Error('API returned '+r.status);
     render(await r.json());
@@ -172,6 +186,9 @@ async function refresh(){
 }
 
 $('rb').onclick=refresh;
+$('searchForm').onsubmit=function(e){e.preventDefault();setSearch($('searchInput').value)};
+$('clearSearch').onclick=function(){setSearch('')};
+$('searchInput').value=currentSearch;
 refresh();
 </script>
 </body>
