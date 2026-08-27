@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Daily Calendar Agenda — Design Control</title>
+<style>
+:root{color-scheme:light dark;--bg:#f2f5f8;--panel:#fff;--panel2:#f7f9fb;--text:#172b3f;--muted:#66788a;--line:#dbe3ea;--accent:#2878b5;--danger:#b42318;--good:#16794d;--warn:#9a6700;--shadow:0 10px 30px rgba(19,47,76,.07)}
+@media(prefers-color-scheme:dark){:root{--bg:#0d131a;--panel:#151c24;--panel2:#111820;--text:#edf3f7;--muted:#a4b0bd;--line:#2e3944;--accent:#66aee0;--danger:#ff8178;--good:#62d49c;--warn:#f4bd61;--shadow:none}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}.wrap{max-width:1380px;margin:auto;padding:24px 18px 60px}.top{display:flex;gap:20px;justify-content:space-between;align-items:flex-start;margin-bottom:16px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}h1{margin:5px 0 6px;font-size:29px;line-height:1.12}.sub{color:var(--muted);max-width:820px;line-height:1.5}.top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;min-height:42px;padding:0 14px;font:inherit;font-weight:750;cursor:pointer}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.danger{border-color:var(--danger);color:var(--danger)}.btn:disabled{opacity:.45;cursor:not-allowed}.statusbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.status{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}.slabel{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}.svalue{font-weight:780;margin-top:5px}.notice{display:none;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 13px;margin:0 0 14px;line-height:1.45}.notice.error{border-color:var(--danger);color:var(--danger)}.notice.good{border-color:var(--good);color:var(--good)}.login{max-width:520px;margin:40px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow)}.login h2{margin:0 0 7px}.login p{color:var(--muted);line-height:1.5;margin:0 0 14px}.input,.select,.number,.hex{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--text);padding:9px 10px;min-height:40px;font:inherit}.login-row{display:flex;gap:8px}.app{display:none}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}.editor,.preview{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.editor-head{padding:14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.search{min-width:250px;flex:1}.filters{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:999px;padding:6px 9px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}.sections{padding:0 14px 14px}.section{padding-top:14px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 7px;font-size:15px}.section-count{font-size:10px;color:var(--muted)}.field{display:grid;grid-template-columns:minmax(220px,1fr) minmax(170px,250px);gap:14px;padding:11px 0;border-top:1px solid var(--line);align-items:center}.flabel{font-weight:740}.fdesc{font-size:11px;line-height:1.45;color:var(--muted);margin-top:3px}.sensitive{display:inline-block;margin-left:6px;border:1px solid var(--warn);color:var(--warn);border-radius:999px;padding:1px 5px;font-size:9px;font-weight:800;vertical-align:1px}.control{display:flex;gap:7px;align-items:center}.unit{font-size:11px;color:var(--muted);min-width:26px}.colour{width:44px;height:40px;border:1px solid var(--line);border-radius:8px;background:transparent;padding:3px}.hex{min-width:0}.dirty .flabel:after{content:" •";color:var(--accent)}.preview{padding:14px;position:sticky;top:12px}.preview h2{font-size:15px;margin:0 0 4px}.preview-note{font-size:10px;color:var(--muted);margin-bottom:10px}.mail{border:1px solid var(--line);overflow:hidden;background:#fff;color:#17324d}.mail-header{padding:16px;color:#fff}.mail-header .p-title{font-weight:800}.mail-header .p-date{margin-top:4px;opacity:.9}.mail-body{padding:12px}.p-agenda{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.p-col-title{font-weight:800;font-size:11px;margin-bottom:5px}.event-card{border:1px solid #d6e0e8;border-left-style:solid;background:#fff;padding:7px;font-size:9px}.event-card strong{font-size:10px}.weather{padding:10px}.weather h3{font-size:12px;margin:0 0 2px}.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:7px 0}.tile{border:1px solid #d6e0e8;padding:5px;text-align:center;font-size:7px}.tile b{display:block;font-size:10px;margin-top:2px}.mini-chart{background:#fff;border:1px solid #d6e0e8;padding:6px;margin-top:5px}.mini-title{font-size:8px;font-weight:800;margin-bottom:4px}.bars{height:42px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid #aab6c0;position:relative;overflow:hidden}.bar{width:5px;background:#6ea8c9}.outlook{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:7px}.day{border:1px solid #d6e0e8;text-align:center;padding:4px 2px;font-size:6px}.day b{display:block;font-size:7px}.history{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.history h3{font-size:12px;margin:0 0 5px}.history-item{font-size:10px;color:var(--muted);padding:3px 0}.footerbar{position:sticky;bottom:0;margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px;display:flex;justify-content:space-between;gap:10px;align-items:center;box-shadow:var(--shadow)}.dirtytext{font-size:11px;color:var(--muted)}
+@media(max-width:1040px){.workspace{grid-template-columns:1fr}.preview{position:static}.statusbar{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.wrap{padding:16px 10px 50px}.top{display:block}.top-actions{margin-top:12px;justify-content:flex-start}h1{font-size:24px}.statusbar{grid-template-columns:1fr 1fr}.field{grid-template-columns:1fr;gap:7px}.search{min-width:100%}.editor-head{align-items:stretch}.login-row{display:block}.login-row .btn{width:100%;margin-top:8px}.footerbar{align-items:stretch;flex-direction:column}.footerbar .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="login" class="login">
+    <div class="eyebrow">Daily Calendar Agenda</div>
+    <h2>Design control</h2>
+    <p>Enter the private access key. The key is checked server-side and is not stored in the URL or browser storage.</p>
+    <div class="login-row">
+      <input id="key" class="input" type="password" autocomplete="current-password" placeholder="Access key">
+      <button id="loginBtn" class="btn primary" type="button">Open editor</button>
+    </div>
+    <div id="loginError" class="notice error" style="margin-top:10px"></div>
+  </div>
+
+  <div id="app" class="app">
+    <div class="top">
+      <div>
+        <div class="eyebrow">Daily Calendar Agenda</div>
+        <h1>Email design control</h1>
+        <div class="sub">Every saved setting is stored in Supabase and read by the scheduled task before the email is rendered. Layout-sensitive controls are marked because they can affect Gmail/iPad chart alignment.</div>
+      </div>
+      <div class="top-actions">
+        <button id="reloadBtn" class="btn" type="button">Reload</button>
+        <button id="runBtnTop" class="btn danger" type="button">Re-execute task</button>
+      </div>
+    </div>
+
+    <div id="notice" class="notice"></div>
+
+    <div class="statusbar">
+      <div class="status"><div class="slabel">Design parameters</div><div id="paramCount" class="svalue">—</div></div>
+      <div class="status"><div class="slabel">Last saved</div><div id="savedAt" class="svalue">—</div></div>
+      <div class="status"><div class="slabel">Scheduled delivery</div><div class="svalue">Daily · 06:30 London</div></div>
+      <div class="status"><div class="slabel">Manual run</div><div id="runState" class="svalue">No request queued</div></div>
+    </div>
+
+    <div class="workspace">
+      <div class="editor">
+        <div class="editor-head">
+          <input id="search" class="input search" type="search" placeholder="Search parameters…">
+          <div id="filters" class="filters"></div>
+        </div>
+        <div id="sections" class="sections"></div>
+      </div>
+
+      <aside class="preview">
+        <h2>Live design preview</h2>
+        <div class="preview-note">Compact visual guide. The scheduled task remains the final email renderer.</div>
+        <div id="mail" class="mail">
+          <div id="mailHeader" class="mail-header"><div id="previewTitle" class="p-title">Your day</div><div id="previewDate" class="p-date">Thursday 27 August</div></div>
+          <div id="mailBody" class="mail-body">
+            <div id="pAgenda" class="p-agenda">
+              <div><div class="p-col-title">All day &amp; ongoing</div><div id="allDayCard" class="event-card"><strong>Example all-day event</strong><br><span>All day · Perso</span></div></div>
+              <div><div class="p-col-title">Schedule</div><div id="scheduledCard" class="event-card"><strong>10:00–11:00</strong><br><span>Example meeting · Work synced</span></div></div>
+            </div>
+            <div id="weather" class="weather">
+              <h3>Cupar weather</h3><div style="font-size:9px">Cloudy with sunny intervals</div>
+              <div id="tiles" class="tiles"><div class="tile">Temperature<b>12–18°C</b></div><div class="tile">Rain<b>30%</b></div><div class="tile">Wind<b>7–11 mph</b></div><div class="tile">Max gust<b>22 mph</b></div></div>
+              <div class="mini-chart"><div class="mini-title">Temperature</div><div id="tempBars" class="bars"></div></div>
+              <div class="mini-chart"><div class="mini-title">Wind and gusts</div><div id="windBars" class="bars"></div></div>
+              <div id="pOutlook" class="outlook"></div>
+            </div>
+          </div>
+        </div>
+        <div class="history"><h3>Recent saves</h3><div id="history"></div></div>
+      </aside>
+    </div>
+
+    <div class="footerbar">
+      <div id="dirtyText" class="dirtytext">No unsaved changes.</div>
+      <div><button id="runBtn" class="btn danger" type="button">Re-execute task</button> <button id="saveBtn" class="btn primary" type="button" disabled>Save changes</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var API='https://rbwcmjtcmhnivkmoxpsj.supabase.co/functions/v1/daily-agenda-designer';
+  var state={key:'',settings:{},original:{},fields:[],history:[],runs:[],filter:'All',dirty:{}};
+  var $=function(id){return document.getElementById(id)};
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function getPath(obj,path){return path.split('.').reduce(function(v,k){return v==null?undefined:v[k]},obj)}
+  function setPath(obj,path,value){var bits=path.split('.'),cur=obj;for(var i=0;i<bits.length-1;i++){if(!cur[bits[i]]||typeof cur[bits[i]]!=='object')cur[bits[i]]={};cur=cur[bits[i]]}cur[bits[bits.length-1]]=value}
+  function clone(v){return JSON.parse(JSON.stringify(v))}
+  function formatDate(v){if(!v)return'—';try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return'—'}}
+  function showNotice(msg,type){var n=$('notice');n.textContent=msg;n.className='notice '+(type||'');n.style.display='block';clearTimeout(showNotice.t);showNotice.t=setTimeout(function(){n.style.display='none'},6500)}
+  async function call(action,extra){var payload=Object.assign({action:action,key:state.key},extra||{});var r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),cache:'no-store'});var data=await r.json().catch(function(){return{error:'Invalid server response'}});if(!r.ok)throw new Error(data.error||('Request failed: '+r.status));return data}
+  function parseOption(v){try{return JSON.parse(v)}catch(e){return v}}
+  function controlHtml(f,val){var id='f_'+f.sort_order;if(f.control_type==='color')return '<div class="control"><input class="colour" type="color" id="'+id+'_color" value="'+esc(String(val||'#000000'))+'" data-path="'+esc(f.path)+'"><input class="hex" type="text" id="'+id+'" value="'+esc(val)+'" maxlength="7" data-path="'+esc(f.path)+'"></div>';if(f.control_type==='select'){var opts=(f.options||[]).map(function(o){var raw=JSON.stringify(o),selected=JSON.stringify(val)===raw?' selected':'';return'<option value="'+esc(raw)+'"'+selected+'>'+esc(String(o))+(f.unit?' '+esc(f.unit):'')+'</option>'}).join('');return '<div class="control"><select class="select" id="'+id+'" data-path="'+esc(f.path)+'">'+opts+'</select></div>'}return '<div class="control"><input class="number" type="number" id="'+id+'" data-path="'+esc(f.path)+'" value="'+esc(val)+'"'+(f.min_value!=null?' min="'+esc(f.min_value)+'"':'')+(f.max_value!=null?' max="'+esc(f.max_value)+'"':'')+(f.step_value!=null?' step="'+esc(f.step_value)+'"':'')+'><span class="unit">'+esc(f.unit||'')+'</span></div>'}
+  function renderFilters(){var sections=['All'];state.fields.forEach(function(f){if(sections.indexOf(f.section)<0)sections.push(f.section)});$('filters').innerHTML=sections.map(function(s){return'<button class="chip'+(state.filter===s?' active':'')+'" type="button" data-section="'+esc(s)+'">'+esc(s)+'</button>'}).join('');$('filters').querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){state.filter=b.dataset.section;renderFilters();renderFields()})})}
+  function renderFields(){var q=$('search').value.trim().toLowerCase(),groups={};state.fields.forEach(function(f){if(state.filter!=='All'&&f.section!==state.filter)return;var hay=(f.label+' '+f.description+' '+f.path+' '+f.section).toLowerCase();if(q&&hay.indexOf(q)<0)return;(groups[f.section]||(groups[f.section]=[])).push(f)});var html='';Object.keys(groups).forEach(function(section){var fs=groups[section];html+='<section class="section"><div class="section-title"><span>'+esc(section)+'</span><span class="section-count">'+fs.length+' settings</span></div>';fs.forEach(function(f){var val=getPath(state.settings,f.path),dirty=!!state.dirty[f.path];html+='<div class="field'+(dirty?' dirty':'')+'" data-field="'+esc(f.path)+'"><div><div class="flabel">'+esc(f.label)+(f.layout_sensitive?'<span class="sensitive">LAYOUT-SENSITIVE</span>':'')+'</div><div class="fdesc">'+esc(f.description)+'</div></div>'+controlHtml(f,val)+'</div>'});html+='</section>'});$('sections').innerHTML=html||'<div style="padding:20px;color:var(--muted)">No matching parameters.</div>';wireControls()}
+  function wireControls(){$('sections').querySelectorAll('[data-path]').forEach(function(el){el.addEventListener('input',function(){var path=el.dataset.path,f=state.fields.find(function(x){return x.path===path});if(!f)return;var value=f.control_type==='number'?Number(el.value):f.control_type==='select'?parseOption(el.value):String(el.value).toUpperCase();setPath(state.settings,path,value);state.dirty[path]=JSON.stringify(value)!==JSON.stringify(getPath(state.original,path));if(!state.dirty[path])delete state.dirty[path];if(f.control_type==='color'){var isPicker=el.id.endsWith('_color');var pair=isPicker?document.getElementById(el.id.replace('_color','')):document.getElementById(el.id+'_color');if(pair){if(isPicker)pair.value=value;else if(/^#[0-9A-Fa-f]{6}$/.test(value))pair.value=value}}updateDirty();updatePreview()})})}
+  function updateDirty(){var count=Object.keys(state.dirty).length;$('dirtyText').textContent=count?count+' unsaved change'+(count===1?'':'s')+'. Save before re-executing the task.':'No unsaved changes.';$('saveBtn').disabled=!count;$('runBtn').disabled=!!count;$('runBtnTop').disabled=!!count;$('sections').querySelectorAll('.field').forEach(function(row){row.classList.toggle('dirty',!!state.dirty[row.dataset.field])})}
+  function px(path,fallback){var n=Number(getPath(state.settings,path));return Number.isFinite(n)?n:fallback}
+  function colour(path,fallback){var v=getPath(state.settings,path);return /^#[0-9A-Fa-f]{6}$/.test(String(v||''))?v:fallback}
+  function updatePreview(){var font=getPath(state.settings,'typography.font_family')||'Arial, Helvetica, sans-serif';$('mail').style.fontFamily=font;$('mail').style.background=colour('colours.main_bg','#fff');$('mail').style.color=colour('colours.main_text','#17324d');$('mailHeader').style.background=colour('colours.header_bg','#173b5e');$('mailHeader').style.color=colour('colours.header_text','#fff');$('mailHeader').style.borderRadius=px('email_layout.header_radius_px',10)+'px';$('mailHeader').style.padding=px('email_layout.header_padding_px',20)+'px';$('previewTitle').style.fontSize=px('typography.header_title_size_px',26)+'px';$('previewDate').style.fontSize=px('typography.date_size_px',16)+'px';$('mailBody').style.fontSize=px('typography.base_font_size_px',14)+'px';$('pAgenda').style.gap=px('agenda.column_gap_px',12)+'px';['allDayCard','scheduledCard'].forEach(function(id){var el=$(id);el.style.borderRadius=px('agenda.event_card_radius_px',8)+'px';el.style.background=colour('colours.event_card_bg','#fff')});$('allDayCard').style.borderLeftWidth=px('agenda.event_accent_width_px',5)+'px';$('allDayCard').style.borderLeftColor=colour('colours.all_day_accent','#6b8fb3');$('scheduledCard').style.borderLeftWidth=px('agenda.event_accent_width_px',5)+'px';$('scheduledCard').style.borderLeftColor=colour('colours.work_accent','#000000');$('weather').style.background=colour('colours.weather_section_bg','#eaf4fb');$('weather').style.borderRadius=px('weather_summary.section_radius_px',10)+'px';$('tiles').style.gridTemplateColumns='repeat('+Math.min(4,Number(getPath(state.settings,'weather_summary.tile_columns'))||4)+',1fr)';$('tiles').querySelectorAll('.tile').forEach(function(t){t.style.background=colour('colours.weather_tile_bg','#fff');t.style.borderColor=colour('colours.border','#d6e0e8');t.style.borderRadius=px('weather_summary.tile_radius_px',8)+'px'});var temp=[];for(var i=0;i<24;i++){var h=10+Math.round((Math.sin((i-6)/24*Math.PI*2)+1)*13);temp.push('<span class="bar" style="height:'+h+'px;background:'+colour(i<8?'colours.temperature_cool':i<17?'colours.temperature_mild':'colours.temperature_warm','#6ea8c9')+'"></span>')}$('tempBars').innerHTML=temp.join('');var wind=[];for(var j=0;j<24;j++){var wh=8+Math.round((Math.sin((j-3)/24*Math.PI*2)+1)*12);wind.push('<span class="bar" style="height:'+wh+'px;background:linear-gradient(to top,'+colour('colours.wind_sustained','#2c6f73')+' 0 58%,'+colour('colours.wind_gust','#a8d6d4')+' 58% 100%)"></span>')}$('windBars').innerHTML=wind.join('');var days=['Fri','Sat','Sun','Mon','Tue','Wed'];$('pOutlook').innerHTML=days.map(function(d,i){return'<div class="day" style="background:'+colour('colours.outlook_card_bg','#fff')+';border-radius:'+px('outlook.card_radius_px',8)+'px;border-color:'+colour('colours.border','#d6e0e8')+'"><b style="color:'+colour('colours.outlook_heading','#173b5e')+'">'+d+'</b>'+(i%2?'☁️':'🌤️')+'<br>18° / 11°</div>'}).join('')}
+  function renderStatus(){$('paramCount').textContent=state.fields.length;$('savedAt').textContent=formatDate(state.updated_at);var latest=state.runs&&state.runs[0];if(!latest){$('runState').textContent='No request queued';return}var text='#'+latest.id+' · '+latest.status;if(latest.status==='pending')text+=' · next :30 check';$('runState').textContent=text}
+  function renderHistory(){var items=state.history||[];$('history').innerHTML=items.length?items.map(function(h){return'<div class="history-item">'+formatDate(h.changed_at)+' · '+esc(h.changed_by||'app')+'</div>'}).join(''):'<div class="history-item">No saved changes yet.</div>'}
+  function applyLoaded(data){state.settings=clone(data.settings||{});state.original=clone(data.settings||{});state.fields=data.fields||[];state.history=data.history||[];state.runs=data.run_requests||[];state.updated_at=data.updated_at;state.dirty={};renderFilters();renderFields();updateDirty();renderStatus();renderHistory();updatePreview()}
+  async function login(){var k=$('key').value.trim();$('loginError').style.display='none';if(!k)return;state.key=k;$('loginBtn').disabled=true;try{var data=await call('load');$('login').style.display='none';$('app').style.display='block';applyLoaded(data)}catch(e){state.key='';$('loginError').textContent=e.message;$('loginError').style.display='block'}finally{$('loginBtn').disabled=false}}
+  async function reload(){try{applyLoaded(await call('load'));showNotice('Reloaded the current saved design.','good')}catch(e){showNotice(e.message,'error')}}
+  async function save(){var changes={};Object.keys(state.dirty).forEach(function(path){changes[path]=getPath(state.settings,path)});if(!Object.keys(changes).length)return;$('saveBtn').disabled=true;try{var data=await call('save',{changes:changes});applyLoaded(data);showNotice('Design saved. Future task runs will use these values.','good')}catch(e){showNotice(e.message,'error');updateDirty()}}
+  async function requestRun(){if(Object.keys(state.dirty).length){showNotice('Save your changes before requesting a run.','error');return}var buttons=[$('runBtn'),$('runBtnTop')];buttons.forEach(function(b){b.disabled=true});try{var data=await call('run');state.runs=data.run_requests||state.runs;renderStatus();showNotice(data.message||'Run request queued.','good')}catch(e){showNotice(e.message,'error')}finally{buttons.forEach(function(b){b.disabled=false})}}
+  $('loginBtn').addEventListener('click',login);$('key').addEventListener('keydown',function(e){if(e.key==='Enter')login()});$('search').addEventListener('input',renderFields);$('reloadBtn').addEventListener('click',reload);$('saveBtn').addEventListener('click',save);$('runBtn').addEventListener('click',requestRun);$('runBtnTop').addEventListener('click',requestRun);
+})();
+</script>
+</body>
+</html>
