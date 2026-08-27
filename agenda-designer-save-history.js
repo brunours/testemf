@@ -155,12 +155,5 @@ document.addEventListener('click',function(e){
   var btn=e.target&&e.target.closest?e.target.closest('#saveBtn'):null;
   if(btn&&Object.keys(pending).length){saving=true;updateSaveUI()}
 },true);
-
-var observer=new MutationObserver(function(){
-  if(!saving)updateSaveUI();
-});
-window.addEventListener('DOMContentLoaded',function(){
-  var footer=$('dirtyText');if(footer)observer.observe(footer,{childList:true,subtree:true,characterData:true});
-  updateSaveUI();
-});
+window.addEventListener('DOMContentLoaded',function(){setTimeout(updateSaveUI,0)});
 })();
