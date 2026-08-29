@@ -8,9 +8,10 @@ var searchResults=[];
 var searchTimer=null;
 var searchSeq=0;
 var previewObserver=null;
+var preferenceSaving=false;
 
 function $(id){return document.getElementById(id)}
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]})}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function key(){var el=$('key');return el?el.value.trim():''}
 function fmtDate(v){if(!v)return'—';try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(v))}catch(e){return'—'}}
 function sameLocation(a,b){return !!(a&&b&&a.geohash===b.geohash)}
@@ -43,11 +44,16 @@ function injectStyles(){
 .weather-results option{padding:8px 10px;min-height:38px}
 .weather-search-status{font-size:10px;color:var(--muted);margin-top:6px;min-height:15px}
 .weather-location-actions{display:flex;gap:8px}.weather-save{min-width:138px}.weather-save.saved{background:color-mix(in srgb,var(--good) 78%,var(--panel));border-color:var(--good)}
+.weather-time-pref{margin-top:12px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+.weather-time-pref-label{display:flex;align-items:flex-start;gap:9px;cursor:pointer;color:var(--text);font-size:12px;font-weight:760;line-height:1.35}
+.weather-time-pref-label input{width:18px;height:18px;margin:0;flex:0 0 auto;accent-color:var(--accent)}
+.weather-time-pref-help{font-size:10px;color:var(--muted);line-height:1.45;margin:5px 0 0 27px}
+.weather-time-pref-status{font-size:10px;line-height:1.35;margin:5px 0 0 27px;min-height:14px}.weather-time-pref-status.good{color:var(--good);font-weight:700}.weather-time-pref-status.error{color:var(--danger);font-weight:700}
 .weather-selected{display:none;margin-top:11px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:10px 11px;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
 .weather-selected.show{display:grid}.weather-selected-name{font-size:12px;font-weight:800}.weather-selected-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .weather-coverage{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.weather-pill{font-size:8px;font-weight:800;border:1px solid var(--line);border-radius:999px;padding:3px 6px;color:var(--muted);white-space:nowrap}.weather-pill.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,var(--line))}
 .weather-warning{font-size:10px;color:var(--warn);font-weight:700;margin-top:8px}.weather-error{font-size:10px;color:var(--danger);font-weight:700;margin-top:8px}
-@media(max-width:720px){.weather-location-head{display:block}.weather-location-current{text-align:left;margin-top:8px}.weather-location-grid{grid-template-columns:1fr}.weather-location-actions{justify-content:flex-start}.weather-selected{grid-template-columns:1fr}.weather-coverage{justify-content:flex-start}.weather-results{font-size:16px}.weather-search-input{font-size:16px}}
+@media(max-width:720px){.weather-location-head{display:block}.weather-location-current{text-align:left;margin-top:8px}.weather-location-grid{grid-template-columns:1fr}.weather-location-actions{justify-content:flex-start}.weather-selected{grid-template-columns:1fr}.weather-coverage{justify-content:flex-start}.weather-results{font-size:16px}.weather-search-input{font-size:16px}.weather-time-pref-label{font-size:14px}.weather-time-pref-help,.weather-time-pref-status{font-size:11px}}
 `;
   document.head.appendChild(s);
 }
@@ -57,12 +63,13 @@ function buildPanel(){
   var statusbar=document.querySelector('.statusbar');if(!statusbar)return;
   var panel=document.createElement('section');
   panel.id='weatherLocationPanel';panel.className='weather-location-panel';
-  panel.innerHTML='<div class="weather-location-head"><div><div class="weather-location-title">Weather location</div><div class="weather-location-help">Type at least 3 characters. Matching places come directly from the Met Office location catalogue. On iPad and iPhone, the matching locations use Safari’s native selection control for reliable touch input. Open-Meteo then uses the selected coordinates directly.</div></div><div id="weatherCurrent" class="weather-location-current">Loading current location…</div></div><div class="weather-location-grid"><div><label class="weather-search-label" for="weatherLocationSearch">Town, city or place</label><input id="weatherLocationSearch" class="weather-search-input" type="search" autocomplete="off" autocapitalize="words" placeholder="Start typing a location…"><div id="weatherResultsWrap" class="weather-results-wrap" hidden><label class="weather-results-label" for="weatherLocationSuggestions">Matching locations</label><select id="weatherLocationSuggestions" class="weather-results" size="5"><option value="" disabled selected>Tap a location to select it</option></select></div><div id="weatherSearchStatus" class="weather-search-status">Suggestions appear after 3 characters.</div></div><div class="weather-location-actions"><button id="weatherLocationSave" class="btn primary weather-save" type="button" disabled>Saved ✓</button></div></div><div id="weatherSelected" class="weather-selected"><div><div id="weatherSelectedName" class="weather-selected-name"></div><div id="weatherSelectedMeta" class="weather-selected-meta"></div><div id="weatherLocationMessage"></div></div><div class="weather-coverage"><span class="weather-pill good">Met Office forecast</span><span class="weather-pill good">Nearest observations</span><span class="weather-pill good">Open-Meteo coordinates</span></div></div>';
+  panel.innerHTML='<div class="weather-location-head"><div><div class="weather-location-title">Weather location</div><div class="weather-location-help">Type at least 3 characters. Matching places come directly from the Met Office location catalogue. The matching locations use the browser\'s native selection control for reliable input on iPad, iPhone, Edge and other desktop browsers. Open-Meteo then uses the selected coordinates directly.</div></div><div id="weatherCurrent" class="weather-location-current">Loading current location…</div></div><div class="weather-location-grid"><div><label class="weather-search-label" for="weatherLocationSearch">Town, city or place</label><input id="weatherLocationSearch" class="weather-search-input" type="search" autocomplete="off" autocapitalize="words" placeholder="Start typing a location…"><div id="weatherResultsWrap" class="weather-results-wrap" hidden><label class="weather-results-label" for="weatherLocationSuggestions">Matching locations</label><select id="weatherLocationSuggestions" class="weather-results" size="5"><option value="" disabled selected>Select a location</option></select></div><div id="weatherSearchStatus" class="weather-search-status">Suggestions appear after 3 characters.</div><div class="weather-time-pref"><label class="weather-time-pref-label" for="weatherAgendaUseLocalTime"><input id="weatherAgendaUseLocalTime" type="checkbox"><span>Use the weather location\'s local time for agenda items</span></label><div id="weatherAgendaTimeHelp" class="weather-time-pref-help">Off: agenda event times use Europe/London. On: agenda event times use the saved weather location\'s timezone. Weather data, charts, sunrise/sunset and the six-day outlook always use the weather location\'s local time.</div><div id="weatherAgendaTimeStatus" class="weather-time-pref-status"></div></div></div><div class="weather-location-actions"><button id="weatherLocationSave" class="btn primary weather-save" type="button" disabled>Saved ✓</button></div></div><div id="weatherSelected" class="weather-selected"><div><div id="weatherSelectedName" class="weather-selected-name"></div><div id="weatherSelectedMeta" class="weather-selected-meta"></div><div id="weatherLocationMessage"></div></div><div class="weather-coverage"><span class="weather-pill good">Met Office forecast</span><span class="weather-pill good">Nearest observations</span><span class="weather-pill good">Open-Meteo coordinates</span></div></div>';
   statusbar.insertAdjacentElement('afterend',panel);
   $('weatherLocationSearch').addEventListener('input',onSearchInput);
   $('weatherLocationSuggestions').addEventListener('change',onResultSelected);
   $('weatherLocationSuggestions').addEventListener('input',onResultSelected);
   $('weatherLocationSave').addEventListener('click',saveLocation);
+  $('weatherAgendaUseLocalTime').addEventListener('change',saveAgendaTimePreference);
 }
 
 function setCurrent(loc){
@@ -73,8 +80,40 @@ function setCurrent(loc){
     selected=current;
     $('weatherLocationSearch').value=current.display_name||current.name||'';
   }
+  var cb=$('weatherAgendaUseLocalTime');
+  if(cb&&!preferenceSaving)cb.checked=!!current.use_weather_timezone_for_agenda;
+  updateAgendaTimePreferenceText();
   updateSelectedCard();
   updatePreviewLocation();
+}
+
+function updateAgendaTimePreferenceText(){
+  var cb=$('weatherAgendaUseLocalTime'),help=$('weatherAgendaTimeHelp');if(!cb||!help)return;
+  if(cb.checked){
+    var zone=(current&&current.timezone)||'the saved weather location timezone';
+    help.textContent='Agenda event times will be shown in '+zone+'. Weather data, charts, sunrise/sunset and the six-day outlook always use the weather location’s local time.';
+  }else{
+    help.textContent='Agenda event times use Europe/London. Weather data, charts, sunrise/sunset and the six-day outlook always use the weather location’s local time.';
+  }
+}
+
+async function saveAgendaTimePreference(){
+  var cb=$('weatherAgendaUseLocalTime'),status=$('weatherAgendaTimeStatus');if(!cb||!current||preferenceSaving)return;
+  var wanted=cb.checked,previous=!!current.use_weather_timezone_for_agenda;
+  preferenceSaving=true;cb.disabled=true;status.className='weather-time-pref-status';status.textContent='Saving preference…';updateAgendaTimePreferenceText();
+  try{
+    var data=await call('save_preference',{use_weather_timezone_for_agenda:wanted});
+    current=data.location;
+    if(selected&&sameLocation(selected,current))selected=current;
+    cb.checked=!!current.use_weather_timezone_for_agenda;
+    status.className='weather-time-pref-status good';status.textContent=data.message||'Preference saved.';
+    $('weatherCurrent').innerHTML='<strong>'+esc(current.display_name||current.name)+'</strong><br>Met Office · '+esc(current.geohash)+' · '+esc(current.timezone||'timezone auto')+'<br>Saved '+esc(fmtDate(current.updated_at));
+  }catch(e){
+    cb.checked=previous;
+    status.className='weather-time-pref-status error';status.textContent=e.message;
+  }finally{
+    preferenceSaving=false;cb.disabled=false;updateAgendaTimePreferenceText();
+  }
 }
 
 function updateSelectedCard(){
@@ -98,7 +137,7 @@ function updateSelectedCard(){
 function hideResults(){
   var wrap=$('weatherResultsWrap'),sel=$('weatherLocationSuggestions');
   if(wrap)wrap.hidden=true;
-  if(sel){sel.innerHTML='<option value="" disabled selected>Tap a location to select it</option>';sel.selectedIndex=0}
+  if(sel){sel.innerHTML='<option value="" disabled selected>Select a location</option>';sel.selectedIndex=0}
   searchResults=[];
 }
 
@@ -127,13 +166,13 @@ function renderResults(results){
   var wrap=$('weatherResultsWrap'),sel=$('weatherLocationSuggestions');
   searchResults=results.slice();
   if(!results.length){hideResults();$('weatherSearchStatus').textContent='No Met Office forecast locations matched that search.';return}
-  var html='<option value="" disabled selected>Tap a location to select it</option>';
+  var html='<option value="" disabled selected>Select a location</option>';
   results.forEach(function(r,i){var type=r.location_type||(r.domestic?'UK location':'World location');html+='<option value="'+i+'">'+esc(r.display_name||r.name)+' — '+esc(type)+(r.domestic?' — UK':' — World')+'</option>'});
   sel.innerHTML=html;
   sel.size=Math.min(Math.max(results.length+1,3),7);
   sel.selectedIndex=0;
   wrap.hidden=false;
-  $('weatherSearchStatus').textContent=results.length+' Met Office location'+(results.length===1?'':'s')+' found. Tap one in the list below.';
+  $('weatherSearchStatus').textContent=results.length+' Met Office location'+(results.length===1?'':'s')+' found. Select one in the list below.';
 }
 
 function onResultSelected(){
@@ -196,6 +235,7 @@ async function loadLocation(){
     var data=await call('load');
     setCurrent(data.location);
     $('weatherSearchStatus').textContent='Type at least 3 characters to search for another location.';
+    $('weatherAgendaTimeStatus').textContent='';$('weatherAgendaTimeStatus').className='weather-time-pref-status';
   }catch(e){
     $('weatherCurrent').textContent='Could not load weather location';
     $('weatherSearchStatus').textContent=e.message;
