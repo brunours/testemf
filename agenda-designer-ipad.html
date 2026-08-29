@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Daily Calendar Agenda — Design Control</title>
+<link rel="stylesheet" href="agenda-designer-v2.css?v=20260829d">
+</head>
+<body>
+<div class="wrap">
+<div id="login" class="login"><div class="eyebrow">Daily Calendar Agenda</div><h2>Design control</h2><p>Enter the private access key. The key is checked server-side and is never stored in the page URL.</p><div class="login-row"><input id="key" class="input" type="password" autocomplete="current-password" placeholder="Access key"><button id="loginBtn" class="btn primary" type="button">Open editor</button></div><div id="loginError" class="notice error" style="margin-top:10px"></div></div>
+<div id="app" class="app">
+<div class="top"><div><div class="eyebrow">Daily Calendar Agenda</div><h1>Email design control</h1><div class="sub">Every setting below is read by the scheduled task before it renders the email. Layout-sensitive options are marked because changing them can affect Gmail/iPad chart alignment.</div></div><div class="top-actions"><button id="reloadBtn" class="btn" type="button">Reload</button><button id="runBtnTop" class="btn danger" type="button">Re-execute task</button></div></div>
+<div id="notice" class="notice"></div>
+<div class="statusbar"><div class="status"><div class="slabel">Design parameters</div><div id="paramCount" class="svalue">—</div></div><div class="status"><div class="slabel">Last saved</div><div id="savedAt" class="svalue">—</div></div><div class="status"><div class="slabel">Scheduled delivery</div><div class="svalue">Daily · 06:30 London</div></div><div class="status"><div class="slabel">Manual run</div><div id="runState" class="svalue">No request queued</div></div></div>
+<div class="workspace">
+<div class="editor"><div class="editor-head"><input id="search" class="input search" type="search" placeholder="Search parameters…"><div id="filters" class="filters"></div></div><div id="sections" class="sections"></div></div>
+<aside class="preview">
+<div class="preview-head"><div><h2>Live design preview</h2><div class="preview-note">Rendered at the configured email dimensions, then scaled to fit. Changes appear here immediately, even before saving.</div><div id="previewState" class="preview-state">Previewing unsaved changes</div></div><div class="preview-tools"><select id="previewZoom" class="select"><option value="fit">Fit to panel</option><option value="0.50">50%</option><option value="0.75">75%</option><option value="1">100%</option></select></div></div>
+<div id="previewScroll" class="preview-scroll"><div id="previewViewport" class="preview-viewport"><div id="previewCanvas" class="preview-canvas"></div></div></div>
+<div class="history"><h3>Recent saves</h3><div id="history" class="history-list"></div></div>
+</aside>
+</div>
+<div class="footerbar"><div id="dirtyText" class="dirtytext">No unsaved changes.</div><div><button id="runBtn" class="btn danger" type="button">Re-execute task</button> <button id="saveBtn" class="btn primary" type="button" disabled>Save changes</button></div></div>
+</div>
+</div>
+<script src="agenda-designer-save-history.js?v=20260829d"></script>
+<script src="agenda-designer-v2.js?v=20260829d"></script>
+<script src="agenda-location-control.js?v=20260829d"></script>
+</body>
+</html>
